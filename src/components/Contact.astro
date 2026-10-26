@@ -1,0 +1,101 @@
+---
+import { plans } from '../data/plans';
+---
+<section class="section contact" id="contato" aria-labelledby="contact-title">
+  <div class="container grid">
+    <div class="copy">
+      <h2 class="h-display" id="contact-title">Coloque a frota no mapa esta semana.</h2>
+      <p class="lede muted">Mostramos a Rotta com os seus endereços e veículos. Em 30 minutos você vê as rotas do seu dia montadas.</p>
+    </div>
+
+    <form class="form" data-form novalidate>
+      <div class="field">
+        <label for="f-name">Nome</label>
+        <input id="f-name" name="nome" autocomplete="name" required placeholder="Como podemos te chamar" />
+      </div>
+      <div class="field">
+        <label for="f-email">E-mail de trabalho</label>
+        <input id="f-email" name="email" type="email" autocomplete="email" required placeholder="voce@empresa.com.br" />
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="f-fleet">Veículos</label>
+          <input id="f-fleet" name="veiculos" type="number" min="1" inputmode="numeric" placeholder="15" data-fleet-input />
+        </div>
+        <div class="field">
+          <label for="f-plan">Plano de interesse</label>
+          <select id="f-plan" name="plano" data-plan-select>
+            {plans.map((p) => <option value={p.name} selected={p.recommended}>{p.name}, R$ {p.price}</option>)}
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary submit" type="submit">Agendar demonstração</button>
+      <p class="form-msg mono" data-form-msg role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+
+<style>
+  .grid { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: var(--spacing-86); align-items: end; }
+  .copy { display: grid; gap: var(--spacing-29); }
+  .copy .h-display { max-width: 12ch; text-wrap: balance; }
+  .form { display: grid; gap: var(--spacing-21); }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-21); }
+  .field { display: grid; gap: var(--spacing-5); }
+  label { font-family: var(--font-mono); font-size: var(--text-caption); letter-spacing: 0; color: var(--color-drift-ash); }
+  input, select {
+    width: 100%;
+    background: transparent;
+    color: var(--color-bone-vellum);
+    border: 0;
+    border-bottom: 1px solid var(--color-iron-filings);
+    border-radius: 0;
+    padding: 10px 0 12px;
+    font: inherit;
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking);
+    transition: border-color .15s;
+  }
+  select { appearance: none; background: linear-gradient(45deg, transparent 50%, #84837b 50%) right 6px center / 7px 7px no-repeat, transparent; cursor: pointer; }
+  select option { background: var(--color-obsidian-loam); }
+  input::placeholder { color: var(--color-drift-ash); }
+  input:focus, select:focus { outline: none; border-bottom-color: var(--color-lime-surveyor); }
+  input:focus-visible, select:focus-visible { outline: none; }
+  input[aria-invalid='true'] { border-bottom-color: var(--color-bone-vellum); }
+  .submit { margin-top: var(--spacing-7); justify-self: start; }
+  .form-msg { font-size: var(--text-ui); min-height: 1.4em; }
+  .form-msg.ok { color: var(--color-lime-surveyor); }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; gap: var(--spacing-59); }
+  }
+  @media (max-width: 480px) {
+    .row { grid-template-columns: 1fr; }
+    .submit { justify-self: stretch; }
+  }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-form]');
+  const msg = document.querySelector<HTMLElement>('[data-form-msg]');
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = form.querySelector<HTMLInputElement>('#f-name')!;
+    const email = form.querySelector<HTMLInputElement>('#f-email')!;
+    const errors: string[] = [];
+    name.setAttribute('aria-invalid', String(!name.value.trim()));
+    email.setAttribute('aria-invalid', String(!email.validity.valid || !email.value));
+    if (!name.value.trim()) errors.push('Preencha seu nome.');
+    if (!email.value || !email.validity.valid) errors.push('Informe um e-mail válido, como voce@empresa.com.br.');
+    if (!msg) return;
+    if (errors.length) {
+      msg.classList.remove('ok');
+      msg.textContent = errors.join(' ');
+      (name.value.trim() ? email : name).focus();
+      return;
+    }
+    // Integre aqui com o endpoint de leads (ex.: Supabase, n8n ou CRM)
+    msg.classList.add('ok');
+    msg.textContent = `Pedido de demonstração enviado. Vamos escrever para ${email.value} para combinar o horário.`;
+    form.reset();
+  });
+</script>

@@ -1,0 +1,214 @@
+---
+// Problema de roteamento: paradas geradas no build, ordem otimizada por vizinho mais próximo + 2-opt
+// (métrica Manhattan, aproximando o trajeto por ruas em grade).
+function rng(seed: number) {
+  return () => {
+    seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const r = rng(42);
+const VW = 720, VH = 460;
+const snap = (n: number) => Math.round(n / 20) * 20;
+const depot = { x: 60, y: 400 };
+const stops: { x: number; y: number }[] = [];
+while (stops.length < 14) {
+  const p = { x: snap(140 + r() * 540), y: snap(40 + r() * 380) };
+  if (stops.every((s) => Math.abs(s.x - p.x) + Math.abs(s.y - p.y) > 90)) stops.push(p);
+}
+const pts = [depot, ...stops];
+const d = (a: number, b: number) => Math.abs(pts[a].x - pts[b].x) + Math.abs(pts[a].y - pts[b].y);
+const tourLen = (t: number[]) => t.reduce((s, v, i) => (i ? s + d(t[i - 1], v) : 0), 0);
+
+const original = [0, ...stops.map((_, i) => i + 1), 0];
+
+// vizinho mais próximo
+const left = new Set(stops.map((_, i) => i + 1));
+let opt = [0];
+while (left.size) {
+  const cur = opt[opt.length - 1];
+  let best = -1, bd = Infinity;
+  for (const c of left) if (d(cur, c) < bd) { bd = d(cur, c); best = c; }
+  opt.push(best); left.delete(best);
+}
+opt.push(0);
+// 2-opt
+let improved = true;
+while (improved) {
+  improved = false;
+  for (let i = 1; i < opt.length - 2; i++) {
+    for (let k = i + 1; k < opt.length - 1; k++) {
+      const delta = d(opt[i - 1], opt[k]) + d(opt[i], opt[k + 1]) - d(opt[i - 1], opt[i]) - d(opt[k], opt[k + 1]);
+      if (delta < -0.01) { opt = [...opt.slice(0, i), ...opt.slice(i, k + 1).reverse(), ...opt.slice(k + 1)]; improved = true; }
+    }
+  }
+}
+
+const toPath = (t: number[]) =>
+  t.map((v, i) => {
+    const p = pts[v];
+    if (i === 0) return `M${p.x} ${p.y}`;
+    const prev = pts[t[i - 1]];
+    return i % 2 ? `H${p.x}V${p.y}` : `V${p.y}H${p.x}`;
+  }).join('');
+
+const kmPerPx = 36.4 / tourLen(opt);
+const stats = (t: number[]) => {
+  const km = tourLen(t) * kmPerPx;
+  const min = (km / 24) * 60 + stops.length * 5;
+  return { km: km.toFixed(1).replace('.', ','), time: `${Math.floor(min / 60)}h${String(Math.round(min % 60)).padStart(2, '0')}` };
+};
+const sOrig = stats(original);
+const sOpt = stats(opt);
+const saving = Math.round((1 - tourLen(opt) / tourLen(original)) * 100);
+const orderOrig = Object.fromEntries(original.slice(1, -1).map((v, i) => [v, i + 1]));
+const orderOpt = Object.fromEntries(opt.slice(1, -1).map((v, i) => [v, i + 1]));
+
+// grade de ruas de fundo
+let grid = '';
+for (let x = 0; x <= VW; x += 20) grid += `M${x} 0V${VH}`;
+for (let y = 0; y <= VH; y += 20) grid += `M0 ${y}H${VW}`;
+
+const constraints = ['Janela de horário por cliente', 'Capacidade de cada veículo', 'Turno do motorista', 'Prioridade de pedido', 'Retorno à base'];
+---
+<section class="section routing" id="rotas" aria-labelledby="routing-title" data-routing>
+  <div class="container">
+    <div class="head">
+      <h2 class="h-heading" id="routing-title">A ordem das paradas que economiza quilômetro.</h2>
+      <div class="head-text">
+        <p class="lede">A roteirização considera a distância e o tempo reais de cada trecho pelas ruas, a janela de horário de cada cliente e a capacidade de cada veículo. Você importa os pedidos; a Rotta devolve a rota de cada motorista.</p>
+        <p class="muted">Se um pedido entra ou cai durante o dia, a rota é recalculada a partir da posição atual do veículo.</p>
+      </div>
+    </div>
+
+    <figure class="board">
+      <div class="board-bar">
+        <div class="mode mono" aria-live="polite">
+          <span data-mode-label>Ordem de cadastro dos pedidos</span>
+        </div>
+        <button type="button" class="btn btn-primary" aria-pressed="false" data-route-toggle>Otimizar rota</button>
+      </div>
+
+      <div class="board-body">
+        <svg viewBox={`0 0 ${VW} ${VH}`} class="route-svg" role="img" aria-labelledby="route-svg-desc">
+          <desc id="route-svg-desc">Mapa com 14 paradas e uma base. Na ordem de cadastro, o trajeto cruza a cidade várias vezes; na rota otimizada, o trajeto segue em sequência e volta à base.</desc>
+          <path d={grid} stroke="#1f2018" stroke-width="1" fill="none" />
+          <path d={toPath(original)} class="path-orig" fill="none" stroke="#84837b" stroke-width="2" stroke-dasharray="5 6" stroke-linejoin="round" />
+          <path d={toPath(opt)} class="path-opt" pathLength="1" fill="none" stroke="#ebfc72" stroke-width="3" stroke-linejoin="round" />
+          <g class="depot" transform={`translate(${depot.x} ${depot.y})`}>
+            <rect x="-13" y="-13" width="26" height="26" fill="#f4f3e8" />
+            <text y="40" text-anchor="middle" class="svg-label">base</text>
+          </g>
+          {stops.map((s, i) => (
+            <g transform={`translate(${s.x} ${s.y})`} class="stop">
+              <circle r="13" fill="#13140e" stroke="#f4f3e8" stroke-width="1.5" />
+              <text text-anchor="middle" dy="4.5" class="n n-orig">{orderOrig[i + 1]}</text>
+              <text text-anchor="middle" dy="4.5" class="n n-opt">{orderOpt[i + 1]}</text>
+            </g>
+          ))}
+        </svg>
+
+        <dl class="stats">
+          <div>
+            <dt class="muted">Distância total</dt>
+            <dd class="mono"><span data-v-orig>{sOrig.km}</span><span data-v-opt>{sOpt.km}</span> km</dd>
+          </div>
+          <div>
+            <dt class="muted">Tempo estimado</dt>
+            <dd class="mono"><span data-v-orig>{sOrig.time}</span><span data-v-opt>{sOpt.time}</span></dd>
+          </div>
+          <div>
+            <dt class="muted">Paradas</dt>
+            <dd class="mono">{stops.length}</dd>
+          </div>
+          <div class="saving">
+            <dt class="muted">Redução de percurso</dt>
+            <dd class="mono"><span data-v-orig>0%</span><span data-v-opt>{saving}%</span></dd>
+          </div>
+        </dl>
+      </div>
+
+      <figcaption class="constraints">
+        <span class="muted cap">Restrições consideradas</span>
+        <ul>{constraints.map((c) => <li class="tag">{c}</li>)}</ul>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .head {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: var(--spacing-59);
+    align-items: end;
+    margin-bottom: var(--spacing-59);
+  }
+  .head-text { display: grid; gap: var(--spacing-14); }
+  .board { border: 1px solid var(--color-iron-filings); }
+  .board-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-14);
+    padding: var(--spacing-14) var(--spacing-18);
+    border-bottom: 1px solid var(--color-iron-filings);
+  }
+  .mode { font-size: var(--text-ui); }
+  .board-body { display: grid; grid-template-columns: minmax(0, 1fr) 260px; }
+  .route-svg { width: 100%; height: auto; padding: var(--spacing-18); }
+  .svg-label { font-family: var(--font-mono); font-size: 13px; fill: #84837b; }
+  .n { font-family: var(--font-mono); font-size: 12px; fill: #f4f3e8; letter-spacing: 0; transition: opacity .3s; }
+  .n-opt { opacity: 0; }
+  .path-orig { transition: opacity .4s; }
+  .path-opt { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.6s cubic-bezier(.5,0,.2,1); }
+  .stop circle { transition: fill .3s, stroke .3s; }
+
+  .is-opt .path-orig { opacity: .18; }
+  .is-opt .path-opt { stroke-dashoffset: 0; }
+  .is-opt .n-orig { opacity: 0; }
+  .is-opt .n-opt { opacity: 1; }
+  .is-opt .stop circle { stroke: #ebfc72; }
+
+  .stats { border-left: 1px solid var(--color-iron-filings); display: grid; align-content: start; }
+  .stats div { padding: var(--spacing-18); border-bottom: 1px solid var(--color-iron-filings); display: grid; gap: var(--spacing-5); }
+  .stats dt { font-size: var(--text-ui); letter-spacing: 0; }
+  .stats dd { font-size: var(--text-subheading); font-weight: 300; line-height: 1.2; }
+  [data-v-opt] { display: none; }
+  .is-opt [data-v-opt] { display: inline; }
+  .is-opt [data-v-orig] { display: none; }
+  .is-opt .saving dd { color: var(--color-lime-surveyor); }
+
+  .constraints {
+    display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-14);
+    padding: var(--spacing-14) var(--spacing-18);
+    border-top: 1px solid var(--color-iron-filings);
+  }
+  .cap { font-size: var(--text-ui); letter-spacing: 0; }
+  .constraints ul { display: flex; flex-wrap: wrap; gap: var(--spacing-7); }
+
+  @media (max-width: 900px) {
+    .head { grid-template-columns: 1fr; gap: var(--spacing-21); margin-bottom: var(--spacing-29); }
+    .board-body { grid-template-columns: 1fr; }
+    .stats { border-left: 0; border-top: 1px solid var(--color-iron-filings); grid-template-columns: 1fr 1fr; }
+    .stats div:nth-child(odd) { border-right: 1px solid var(--color-iron-filings); }
+    .stats dd { font-size: 22px; }
+  }
+  @media (max-width: 520px) {
+    .board-bar { flex-direction: column; align-items: stretch; }
+    .route-svg { padding: var(--spacing-7); }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-routing]').forEach((root) => {
+    const btn = root.querySelector<HTMLButtonElement>('[data-route-toggle]')!;
+    const label = root.querySelector('[data-mode-label]')!;
+    btn.addEventListener('click', () => {
+      const on = !root.classList.contains('is-opt');
+      root.classList.toggle('is-opt', on);
+      btn.setAttribute('aria-pressed', String(on));
+      btn.textContent = on ? 'Ver ordem de cadastro' : 'Otimizar rota';
+      label.textContent = on ? 'Rota otimizada pela Rotta' : 'Ordem de cadastro dos pedidos';
+    });
+  });
+</script>

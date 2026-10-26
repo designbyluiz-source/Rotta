@@ -1,0 +1,52 @@
+---
+import Logo from './Logo.astro';
+const year = new Date().getFullYear();
+---
+<footer class="footer">
+  <div class="container grid">
+    <div class="brand">
+      <span class="brand-name"><Logo /> Rotta</span>
+      <p class="muted">Gestão de frotas e entregas em tempo real.</p>
+    </div>
+    <nav aria-label="Produto">
+      <p class="muted col-t">Produto</p>
+      <ul>
+        <li><a href="#mapa">Mapa ao vivo</a></li>
+        <li><a href="#rotas">Roteirização</a></li>
+        <li><a href="#comprovante">Comprovante de entrega</a></li>
+        <li><a href="#app">App do motorista</a></li>
+        <li><a href="#rastreio">Rastreamento do cliente</a></li>
+      </ul>
+    </nav>
+    <nav aria-label="Empresa">
+      <p class="muted col-t">Empresa</p>
+      <ul>
+        <li><a href="#planos">Planos</a></li>
+        <li><a href="#tecnologia">Tecnologia</a></li>
+        <li><a href="#contato">Contato</a></li>
+        <li><a href="/privacidade">Privacidade</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="container base mono muted">
+    <span>© {year} Rotta</span>
+    <span>-25.4284, -49.2733</span>
+  </div>
+</footer>
+
+<style>
+  .footer { border-top: 1px solid var(--color-iron-filings); padding-top: var(--spacing-86); font-family: var(--font-mono); letter-spacing: 0; font-size: var(--text-caption); }
+  .grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: var(--spacing-29); padding-bottom: var(--spacing-59); }
+  .brand { display: grid; gap: var(--spacing-14); align-content: start; }
+  .brand-name { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-sans); font-size: 22px; letter-spacing: var(--tracking); }
+  .brand p { font-size: var(--text-ui); }
+  .col-t { margin-bottom: var(--spacing-14); }
+  ul { display: grid; gap: var(--spacing-7); }
+  a { text-decoration: none; display: inline-block; padding: 3px 0; }
+  a:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .base { display: flex; justify-content: space-between; gap: var(--spacing-14); padding-block: var(--spacing-21); border-top: 1px solid var(--color-iron-filings); }
+  @media (max-width: 720px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .brand { grid-column: 1 / -1; }
+  }
+</style>

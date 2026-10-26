@@ -1,0 +1,10 @@
+---
+import type { Status } from '../data/operation';
+interface Props { status: Status; size?: number }
+const { status, size = 12 } = Astro.props;
+---
+<svg width={size} height={size} viewBox="-8 -8 16 16" aria-hidden="true" class="status-icon">
+  {status === 'rota' && <circle r="6" fill="#ebfc72" />}
+  {status === 'parado' && <rect x="-5.5" y="-5.5" width="11" height="11" fill="none" stroke="#f4f3e8" stroke-width="1.8" />}
+  {status === 'atrasado' && <path d="M0 -7 L7 6 H-7 Z" fill="#f4f3e8" />}
+</svg>

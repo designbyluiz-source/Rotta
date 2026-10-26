@@ -1,0 +1,218 @@
+---
+const notes = [
+  { k: '72 px', t: 'Altura dos botões principais, sempre na metade de baixo da tela, ao alcance do polegar.' },
+  { k: '16:1', t: 'Contraste entre texto e fundo, legível sob sol direto e com brilho baixo.' },
+  { k: '4 toques', t: 'Da chegada ao comprovante: cheguei, foto, assinatura, confirmar.' },
+  { k: '15 s', t: 'Intervalo de envio da posição em rota. Sem sinal, tudo fica salvo no aparelho e sincroniza quando a conexão volta.' },
+];
+---
+<section class="section driver" id="app" aria-labelledby="driver-title">
+  <div class="container grid">
+    <div class="copy">
+      <h2 class="h-heading" id="driver-title">Um app para usar com pressa e sob sol.</h2>
+      <p class="lede">O motorista vê só o que precisa para a próxima parada. Uma ação principal por tela, botões grandes e alto contraste. Toque no celular ao lado para fazer uma entrega.</p>
+      <dl class="notes">
+        {notes.map((n) => (
+          <div><dt class="mono">{n.k}</dt><dd class="muted">{n.t}</dd></div>
+        ))}
+      </dl>
+    </div>
+
+    <div class="device-wrap">
+      <div class="phone" data-phone>
+        <div class="screen">
+          <div class="status mono" data-net aria-live="polite">
+            <span class="net"><span class="net-dot"></span><span data-net-label>Online, sincronizado</span></span>
+            <span>RT-04</span>
+          </div>
+          <div class="body" data-body aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="device-controls">
+        <button type="button" class="btn btn-ghost" data-offline aria-pressed="false">Simular perda de sinal</button>
+        <p class="mono muted taps">Toques nesta entrega: <span data-taps>0</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: var(--spacing-86);
+    align-items: center;
+  }
+  .copy { display: grid; gap: var(--spacing-29); }
+  .notes { border-top: 1px solid var(--color-iron-filings); }
+  .notes div {
+    display: grid; grid-template-columns: 120px 1fr; gap: var(--spacing-18);
+    padding: var(--spacing-18) 0; border-bottom: 1px solid var(--color-iron-filings);
+  }
+  .notes dt { font-size: 22px; font-weight: 300; color: var(--color-lime-surveyor); line-height: 1.3; }
+
+  .device-wrap { display: grid; justify-items: center; gap: var(--spacing-18); }
+  .phone {
+    width: min(100%, 360px);
+    padding: 10px;
+    border: 1px solid var(--color-iron-filings);
+    border-radius: var(--radius-md);
+    background: #0e0f0a;
+  }
+  .screen {
+    background: var(--color-bone-vellum);
+    color: var(--color-obsidian-loam);
+    min-height: 620px;
+    display: flex; flex-direction: column;
+  }
+  .status {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--color-obsidian-loam); color: var(--color-bone-vellum);
+    font-size: 12px; padding: 10px 14px;
+  }
+  .net { display: inline-flex; align-items: center; gap: 7px; }
+  .net-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-lime-surveyor); }
+  .offline .net-dot { background: transparent; border: 1.5px solid var(--color-bone-vellum); }
+
+  .body { flex: 1; display: flex; flex-direction: column; padding: 18px 16px 16px; gap: 14px; }
+  .device-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--spacing-14) var(--spacing-21); }
+  .taps { font-size: var(--text-caption); }
+
+  @media (max-width: 960px) {
+    .grid { grid-template-columns: 1fr; gap: var(--spacing-59); }
+  }
+  @media (max-width: 520px) {
+    .notes div { grid-template-columns: 1fr; gap: var(--spacing-5); }
+    .screen { min-height: 580px; }
+  }
+</style>
+
+<!-- estilos do conteúdo injetado pelo script -->
+<style is:global>
+  .app-kicker { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0; color: #4a4a43; }
+  .app-title { font-size: 30px; line-height: 1.08; letter-spacing: -0.03em; }
+  .app-sub { font-size: 18px; line-height: 1.4; }
+  .app-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 2px solid #13140e; }
+  .app-facts div { padding: 10px 0; border-bottom: 1px solid #c9c8bc; }
+  .app-facts div:nth-child(odd) { padding-right: 10px; }
+  .app-facts dt { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0; color: #4a4a43; }
+  .app-facts dd { font-size: 20px; letter-spacing: -0.02em; }
+  .app-spacer { flex: 1; }
+  .app-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; min-height: 72px; padding: 0 18px;
+    font-family: var(--font-mono); font-size: 20px; font-weight: 700; letter-spacing: 0;
+    background: #13140e; color: #f4f3e8; border: 0; border-radius: 3.6px; cursor: pointer;
+  }
+  .app-btn:active { transform: translateY(1px); }
+  .app-btn-2 { background: transparent; color: #13140e; border: 2px solid #13140e; min-height: 60px; font-size: 17px; font-weight: 400; }
+  .app-btn:focus-visible { outline: 3px solid #13140e; outline-offset: 3px; }
+  .app-cam {
+    flex: 1; min-height: 210px; display: grid; place-items: center;
+    background: #13140e; color: #f4f3e8; border-radius: 3.6px; position: relative;
+    font-family: var(--font-mono); font-size: 13px; letter-spacing: 0;
+  }
+  .app-cam::before, .app-cam::after { content: ''; position: absolute; width: 22px; height: 22px; border: 2px solid #ebfc72; }
+  .app-cam::before { top: 14px; left: 14px; border-right: 0; border-bottom: 0; }
+  .app-cam::after { bottom: 14px; right: 14px; border-left: 0; border-top: 0; }
+  .app-row { display: flex; align-items: center; gap: 10px; font-size: 16px; padding: 10px 12px; border: 2px solid #13140e; border-radius: 3.6px; }
+  .app-thumb { width: 36px; height: 36px; background: #13140e; border-radius: 2px; flex: none; position: relative; }
+  .app-thumb::after { content: ''; position: absolute; inset: 9px 8px 13px; border: 2px solid #ebfc72; border-top: 0; border-right: 0; transform: rotate(-45deg); }
+  .app-pad { flex: 1; min-height: 150px; border: 2px dashed #84837b; border-radius: 3.6px; position: relative; }
+  .app-pad svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .app-pad span { position: absolute; left: 12px; bottom: 8px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0; color: #4a4a43; }
+  .app-done { display: grid; justify-items: start; gap: 12px; padding-top: 18px; }
+  .app-check { width: 64px; height: 64px; background: #13140e; border-radius: 50%; display: grid; place-items: center; }
+  .app-mono { font-family: var(--font-mono); font-size: 14px; letter-spacing: 0; color: #2a2a24; line-height: 1.5; }
+</style>
+
+<script>
+  const stopsData = [
+    { n: 8, addr: 'Rua Comendador Araújo, 499', bairro: 'Batel', client: 'Padaria Vale', win: '14:00 às 15:00', vol: '3 volumes' },
+    { n: 9, addr: 'Av. Sete de Setembro, 4214', bairro: 'Água Verde', client: 'Farmácia Prado', win: '14:30 às 15:30', vol: '1 volume' },
+    { n: 10, addr: 'Rua Desembargador Motta, 1820', bairro: 'Mercês', client: 'Studio Lume', win: '15:00 às 16:00', vol: '2 volumes' },
+  ];
+  const body = document.querySelector<HTMLElement>('[data-body]');
+  const tapsEl = document.querySelector('[data-taps]');
+  const netWrap = document.querySelector<HTMLElement>('[data-net]');
+  const netLabel = document.querySelector('[data-net-label]');
+  const offBtn = document.querySelector<HTMLButtonElement>('[data-offline]');
+  let step = 0, idx = 0, taps = 0, offline = false, queued = 0;
+  const now = () => new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' }).format(new Date());
+
+  const updateNet = () => {
+    if (!netWrap || !netLabel) return;
+    netWrap.classList.toggle('offline', offline);
+    netLabel.textContent = offline ? `Offline, ${queued} ${queued === 1 ? 'registro salvo' : 'registros salvos'}` : 'Online, sincronizado';
+  };
+  const record = () => { if (offline) { queued++; updateNet(); } };
+
+  const render = () => {
+    if (!body) return;
+    const s = stopsData[idx % stopsData.length];
+    const head = `<p class="app-kicker">Parada ${s.n} de 26</p>`;
+    if (step === 0) {
+      body.innerHTML = `${head}
+        <h3 class="app-title">${s.addr}</h3>
+        <p class="app-sub">${s.bairro}</p>
+        <dl class="app-facts">
+          <div><dt>Cliente</dt><dd>${s.client}</dd></div>
+          <div><dt>Janela</dt><dd>${s.win}</dd></div>
+          <div><dt>Carga</dt><dd>${s.vol}</dd></div>
+          <div><dt>Distância</dt><dd>1,2 km</dd></div>
+        </dl>
+        <div class="app-spacer"></div>
+        <button class="app-btn-2 app-btn" type="button" data-noop>Abrir navegação</button>
+        <button class="app-btn" type="button" data-next>Cheguei</button>`;
+    } else if (step === 1) {
+      body.innerHTML = `${head}
+        <h3 class="app-title">Foto da entrega</h3>
+        <div class="app-cam" aria-hidden="true">Enquadre o pacote e a porta</div>
+        <button class="app-btn" type="button" data-next>Tirar foto</button>`;
+    } else if (step === 2) {
+      body.innerHTML = `${head}
+        <h3 class="app-title">Assinatura</h3>
+        <div class="app-row"><span class="app-thumb"></span>Foto registrada às ${now()}</div>
+        <div class="app-pad">
+          <svg viewBox="0 0 300 150" aria-hidden="true"><path d="M30 100 C 50 40, 70 40, 66 90 C 64 110, 52 108, 60 84 C 72 56, 96 60, 98 92 C 100 112, 116 96, 126 72 C 136 52, 150 62, 146 90 C 144 106, 164 104, 180 74 C 194 50, 210 62, 204 90 C 200 104, 236 94, 270 64" fill="none" stroke="#13140e" stroke-width="3" stroke-linecap="round"/></svg>
+          <span>Recebido por: Marina Sato</span>
+        </div>
+        <button class="app-btn" type="button" data-next>Confirmar entrega</button>`;
+    } else {
+      body.innerHTML = `${head}
+        <div class="app-done">
+          <span class="app-check" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24"><path d="M4 12.5 L9.5 18 L20 6" fill="none" stroke="#ebfc72" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <h3 class="app-title">Entrega concluída</h3>
+          <p class="app-mono">${now()}<br/>-25.44251, -49.28780<br/>${offline ? 'Comprovante salvo no aparelho' : 'Comprovante enviado à central'}</p>
+        </div>
+        <div class="app-spacer"></div>
+        <button class="app-btn" type="button" data-next>Próxima parada</button>`;
+    }
+  };
+
+  body?.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    if (t.closest('[data-next]')) {
+      if (step < 3) { taps++; record(); }
+      if (step === 3) { step = 0; idx++; taps = 0; } else step++;
+      if (tapsEl) tapsEl.textContent = String(taps);
+      render();
+      body.querySelector<HTMLButtonElement>('[data-next]')?.focus({ preventScroll: true });
+    }
+  });
+
+  offBtn?.addEventListener('click', () => {
+    offline = !offline;
+    offBtn.setAttribute('aria-pressed', String(offline));
+    offBtn.textContent = offline ? 'Restaurar sinal' : 'Simular perda de sinal';
+    if (!offline && queued > 0 && netLabel) {
+      netWrap?.classList.remove('offline');
+      netLabel.textContent = `Sincronizando ${queued} ${queued === 1 ? 'registro' : 'registros'}…`;
+      setTimeout(() => { queued = 0; updateNet(); }, 1400);
+    } else {
+      updateNet();
+    }
+  });
+
+  render();
+</script>

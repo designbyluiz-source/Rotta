@@ -1,0 +1,117 @@
+---
+import { plans } from '../data/plans';
+const brl = (n: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(n);
+const DEFAULT = 15;
+---
+<section class="section pricing" id="planos" aria-labelledby="pricing-title" data-pricing>
+  <div class="container">
+    <div class="head">
+      <h2 class="h-heading" id="pricing-title">Planos por veículo, por mês.</h2>
+      <div class="calc">
+        <label for="veh-count" class="calc-label">Quantos veículos na sua frota?</label>
+        <div class="calc-row">
+          <input type="range" id="veh-count" min="1" max="200" value={DEFAULT} data-range />
+          <output for="veh-count" class="mono calc-out"><span data-count>{DEFAULT}</span> veículos</output>
+        </div>
+      </div>
+    </div>
+
+    <ul class="plans">
+      {plans.map((p) => (
+        <li class={`plan ${p.recommended ? 'is-rec' : ''}`}>
+          <div class="plan-top">
+            <h3>{p.name}</h3>
+            {p.recommended && <span class="tag tag-lime">Recomendado</span>}
+          </div>
+          <p class="price"><span class="mono amount"><span class="cur">R$</span>{p.price}</span><span class="muted per">por veículo/mês</span></p>
+          <p class="mono total muted" data-price={p.price}>
+            <span data-total>{brl(p.price * DEFAULT)}</span>/mês para <span data-total-count>{DEFAULT}</span> veículos
+          </p>
+          <p class="summary">{p.summary}</p>
+          <a href={`#contato`} class={`btn ${p.recommended ? 'btn-primary' : 'btn-ghost'}`} data-plan={p.name}>Começar com o {p.name}</a>
+          {p.inherits && <p class="inherits muted">{p.inherits}</p>}
+          <ul class="features">
+            {p.features.map((f) => <li>{f}</li>)}
+          </ul>
+        </li>
+      ))}
+    </ul>
+    <p class="fine muted">Valores em reais, cobrados mensalmente pelo número de veículos ativos. Implantação e treinamento da equipe incluídos em todos os planos.</p>
+  </div>
+</section>
+
+<style>
+  .head { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: var(--spacing-59); align-items: end; margin-bottom: var(--spacing-59); }
+  .calc { display: grid; gap: var(--spacing-14); }
+  .calc-label { font-size: var(--text-body); }
+  .calc-row { display: flex; align-items: center; gap: var(--spacing-18); }
+  .calc-out { font-size: var(--text-ui); min-width: 112px; text-align: right; }
+  input[type=range] {
+    flex: 1; appearance: none; -webkit-appearance: none; height: 28px; background: transparent; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track { height: 2px; background: var(--color-iron-filings); }
+  input[type=range]::-moz-range-track { height: 2px; background: var(--color-iron-filings); }
+  input[type=range]::-moz-range-progress { height: 2px; background: var(--color-lime-surveyor); }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px; margin-top: -8px;
+    background: var(--color-lime-surveyor); border: 0; border-radius: 2px;
+  }
+  input[type=range]::-moz-range-thumb { width: 18px; height: 18px; background: var(--color-lime-surveyor); border: 0; border-radius: 2px; }
+
+  .plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--color-iron-filings); }
+  .plan { padding: var(--spacing-29) var(--spacing-29) var(--spacing-29) 0; display: flex; flex-direction: column; gap: var(--spacing-18); }
+  .plan + .plan { padding-left: var(--spacing-29); border-left: 1px solid var(--color-iron-filings); }
+  .plan:last-child { padding-right: 0; }
+  .is-rec { border-top: 2px solid var(--color-lime-surveyor); margin-top: -1px; }
+  .plan-top { display: flex; justify-content: space-between; align-items: center; min-height: 30px; }
+  h3 { font-size: var(--text-subheading); letter-spacing: var(--tracking); line-height: 1.1; }
+  .price { display: flex; align-items: baseline; gap: var(--spacing-14); flex-wrap: wrap; }
+  .amount { font-size: clamp(44px, 5vw, 65px); font-weight: 300; line-height: 1; }
+  .cur { font-size: 18px; font-weight: 400; vertical-align: top; margin-right: 6px; position: relative; top: 6px; }
+  .per { font-size: var(--text-ui); letter-spacing: 0; }
+  .total { font-size: var(--text-caption); }
+  .total [data-total] { color: var(--color-bone-vellum); }
+  .summary { min-height: 3.2em; }
+  .plan .btn { align-self: stretch; }
+  .inherits { font-size: var(--text-ui); letter-spacing: 0; margin-bottom: calc(var(--spacing-7) * -1); }
+  .features { display: grid; border-top: 1px solid var(--color-iron-filings); }
+  .features li { padding: 11px 0 11px 22px; border-bottom: 1px solid #2a2b24; font-size: 16px; line-height: 1.45; letter-spacing: -0.01em; position: relative; }
+  .features li::before { content: ''; position: absolute; left: 2px; top: 19px; width: 8px; height: 2px; background: var(--color-lime-surveyor); }
+  .fine { margin-top: var(--spacing-29); font-size: var(--text-ui); letter-spacing: 0; max-width: 72ch; }
+
+  @media (max-width: 960px) {
+    .head { grid-template-columns: 1fr; gap: var(--spacing-29); margin-bottom: var(--spacing-29); }
+    .plans { grid-template-columns: 1fr; }
+    .plan, .plan + .plan { padding: var(--spacing-29) 0; border-left: 0; border-bottom: 1px solid var(--color-iron-filings); }
+    .summary { min-height: 0; }
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-pricing]');
+  if (root) {
+    const range = root.querySelector<HTMLInputElement>('[data-range]')!;
+    const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+    const paint = () => {
+      const n = Number(range.value);
+      root.querySelector('[data-count]')!.textContent = String(n);
+      root.querySelectorAll<HTMLElement>('[data-price]').forEach((el) => {
+        el.querySelector('[data-total]')!.textContent = brl.format(Number(el.dataset.price) * n);
+        el.querySelector('[data-total-count]')!.textContent = String(n);
+        el.lastChild!.textContent = n === 1 ? ' veículo' : ' veículos';
+      });
+      const pct = ((n - 1) / 199) * 100;
+      range.style.background = `linear-gradient(to right, #ebfc72 0 ${pct}%, transparent ${pct}%) center / 100% 2px no-repeat`;
+    };
+    range.addEventListener('input', paint);
+    paint();
+    root.querySelectorAll<HTMLAnchorElement>('[data-plan]').forEach((a) =>
+      a.addEventListener('click', () => {
+        const sel = document.querySelector<HTMLSelectElement>('[data-plan-select]');
+        if (sel) sel.value = a.dataset.plan!;
+        const fleet = document.querySelector<HTMLInputElement>('[data-fleet-input]');
+        if (fleet) fleet.value = range.value;
+      }),
+    );
+  }
+</script>

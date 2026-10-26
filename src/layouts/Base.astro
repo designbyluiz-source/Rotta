@@ -1,0 +1,26 @@
+---
+import '../styles/global.css';
+interface Props { title: string; description: string; }
+const { title, description } = Astro.props;
+---
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#13140e" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="icon" href="/favicon.ico?v=rotta1" sizes="48x48" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rotta1" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=rotta1" />
+    <link rel="manifest" href="/site.webmanifest?v=rotta1" />
+  </head>
+  <body>
+    <a class="btn btn-primary skip-link" href="#conteudo">Pular para o conteúdo</a>
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,123 @@
+---
+const meta = [
+  ['Pedido', '#48213'],
+  ['Recebido por', 'Marina Sato'],
+  ['Horário', '14:32:08'],
+  ['Coordenadas', '-25.44251, -49.28780'],
+  ['Precisão GPS', '±4 m'],
+  ['Distância do endereço', '9 m'],
+];
+---
+<section class="section proof" id="comprovante" aria-labelledby="proof-title">
+  <div class="container grid">
+    <figure class="doc" data-proof>
+      <header class="doc-head mono">
+        <span>Comprovante de entrega</span>
+        <span class="tag tag-lime">Entregue</span>
+      </header>
+
+      <div class="photo">
+        <svg viewBox="0 0 400 260" role="img" aria-label="Foto do pacote entregue na porta do cliente">
+          <rect width="400" height="260" fill="#1a1b14" />
+          <rect x="70" y="22" width="150" height="214" fill="none" stroke="#3a3b33" stroke-width="2" />
+          <circle cx="198" cy="148" r="4" fill="#3a3b33" />
+          <path d="M0 236 H400" stroke="#2c2d25" stroke-width="2" />
+          <g transform="translate(236 128)">
+            <path d="M0 22 L70 0 L140 22 L70 44 Z" fill="#2e2f27" stroke="#84837b" stroke-width="1.5" />
+            <path d="M0 22 V82 L70 104 V44 Z" fill="#24251e" stroke="#84837b" stroke-width="1.5" />
+            <path d="M140 22 V82 L70 104 V44 Z" fill="#292a22" stroke="#84837b" stroke-width="1.5" />
+            <path d="M35 11 L105 33 V45" stroke="#bacd31" stroke-width="3" fill="none" opacity=".7" />
+          </g>
+          <g stroke="#f4f3e8" stroke-width="2" fill="none">
+            <path d="M14 34 V14 H34" /><path d="M366 14 H386 V34" /><path d="M14 226 V246 H34" /><path d="M366 246 H386 V226" />
+          </g>
+          <text x="44" y="226" class="ph-meta">IMG_0418.jpg  14:32:05</text>
+        </svg>
+      </div>
+
+      <div class="sig">
+        <span class="muted sig-label">Assinatura</span>
+        <svg viewBox="0 0 300 90" aria-label="Assinatura do recebedor" role="img">
+          <path class="sig-path" pathLength="1" d="M14 62 C 26 20, 44 14, 42 50 C 41 70, 30 72, 34 52 C 40 30, 62 30, 64 54 C 66 70, 76 60, 82 44 C 88 30, 96 34, 94 52 C 93 64, 104 66, 112 48 C 120 30, 130 24, 128 58 C 127 74, 140 70, 150 50 C 158 34, 170 36, 168 54 C 166 66, 180 64, 196 42 C 210 24, 222 40, 214 56 C 208 68, 236 60, 284 38" fill="none" stroke="#f4f3e8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M10 78 H290" stroke="#404040" />
+        </svg>
+      </div>
+
+      <dl class="meta">
+        {meta.map(([k, v]) => (
+          <div><dt class="muted">{k}</dt><dd class="mono">{v}</dd></div>
+        ))}
+      </dl>
+    </figure>
+
+    <div class="copy">
+      <h2 class="h-heading" id="proof-title">Foto, assinatura e local em cada entrega.</h2>
+      <p class="lede">O motorista registra a entrega no app em poucos toques. A Rotta junta foto, assinatura na tela, horário e coordenadas num comprovante ligado ao pedido, disponível para a central e para o cliente.</p>
+      <ul class="points">
+        <li><span class="mono">Foto</span><p class="muted">Tirada pelo app, com horário gravado na imagem. Galeria bloqueada para evitar foto antiga.</p></li>
+        <li><span class="mono">Assinatura</span><p class="muted">Feita com o dedo na tela, com nome e documento de quem recebeu.</p></li>
+        <li><span class="mono">Coordenadas</span><p class="muted">Posição do GPS no momento da entrega, comparada ao endereço do pedido.</p></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: var(--spacing-86);
+    align-items: center;
+  }
+  .doc { border: 1px solid var(--color-iron-filings); background: var(--color-obsidian-loam); }
+  .doc-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: var(--spacing-14) var(--spacing-18);
+    font-size: var(--text-ui);
+    border-bottom: 1px solid var(--color-iron-filings);
+  }
+  .photo svg { width: 100%; height: auto; }
+  .ph-meta { font-family: var(--font-mono); font-size: 12px; fill: #f4f3e8; }
+  .sig { padding: var(--spacing-14) var(--spacing-18) var(--spacing-7); border-top: 1px solid var(--color-iron-filings); }
+  .sig-label { font-size: var(--text-caption); letter-spacing: 0; }
+  .sig svg { width: 100%; max-width: 340px; height: auto; }
+  .sig-path { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .is-visible .sig-path { animation: sign 2.2s cubic-bezier(.45,.05,.3,1) .3s forwards; }
+  @keyframes sign { to { stroke-dashoffset: 0; } }
+  @media (prefers-reduced-motion: reduce) { .sig-path { stroke-dashoffset: 0; } }
+  .meta { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--color-iron-filings); }
+  .meta div { padding: var(--spacing-14) var(--spacing-18); border-bottom: 1px solid #2a2b24; display: grid; gap: 2px; }
+  .meta div:nth-child(odd) { border-right: 1px solid #2a2b24; }
+  .meta div:nth-last-child(-n+2) { border-bottom: 0; }
+  .meta dt { font-size: var(--text-caption); letter-spacing: 0; }
+  .meta dd { font-size: var(--text-ui); }
+
+  .copy { display: grid; gap: var(--spacing-29); }
+  .points { border-top: 1px solid var(--color-iron-filings); }
+  .points li {
+    display: grid; grid-template-columns: 140px 1fr; gap: var(--spacing-18);
+    padding: var(--spacing-18) 0; border-bottom: 1px solid var(--color-iron-filings);
+  }
+  .points span { font-size: var(--text-ui); padding-top: 4px; }
+
+  @media (max-width: 960px) {
+    .grid { grid-template-columns: 1fr; gap: var(--spacing-59); }
+    .copy { order: -1; }
+  }
+  @media (max-width: 520px) {
+    .points li { grid-template-columns: 1fr; gap: var(--spacing-5); }
+    .meta { grid-template-columns: 1fr; }
+    .meta div:nth-child(odd) { border-right: 0; }
+    .meta div:nth-last-child(2) { border-bottom: 1px solid #2a2b24; }
+  }
+</style>
+
+<script>
+  const el = document.querySelector('[data-proof]');
+  if (el) {
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { el.classList.add('is-visible'); io.disconnect(); }
+    }, { threshold: 0.4 });
+    io.observe(el);
+  }
+</script>

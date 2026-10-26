@@ -1,0 +1,385 @@
+---
+import StatusIcon from './StatusIcon.astro';
+import { routes, totals, countBy, statusLabel } from '../data/operation';
+
+/* ---------- Mapa gerado no build (determinístico) ---------- */
+const W = 1440;
+const H = 900;
+function rng(seed: number) {
+  return () => {
+    seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const r = rng(11);
+const f = (n: number) => n.toFixed(0);
+
+// Malha de ruas secundárias
+let minor = '';
+for (let y = -420; y < H + 420; y += 40 + Math.floor(r() * 18)) {
+  let x = -420;
+  while (x < W + 420) {
+    const len = 90 + r() * 380;
+    if (r() > 0.2) minor += `M${f(x)} ${f(y)}H${f(x + len)}`;
+    x += len + 14 + r() * 50;
+  }
+}
+for (let x = -420; x < W + 420; x += 46 + Math.floor(r() * 22)) {
+  let y = -420;
+  while (y < H + 420) {
+    const len = 80 + r() * 320;
+    if (r() > 0.25) minor += `M${f(x)} ${f(y)}V${f(y + len)}`;
+    y += len + 14 + r() * 50;
+  }
+}
+
+// Curvas de nível
+const contours: string[] = [];
+const centers: [number, number, number][] = [[230, 200, 9], [1180, 700, 8], [700, 820, 5], [1250, 120, 4]];
+for (const [cx, cy, n] of centers) {
+  const p1 = r() * 6.28, p2 = r() * 6.28, p3 = r() * 6.28;
+  for (let i = 0; i < n; i++) {
+    const base = 34 + i * 30;
+    let d = '';
+    for (let k = 0; k <= 96; k++) {
+      const a = (k / 96) * Math.PI * 2;
+      const rad = base * (1 + 0.14 * Math.sin(3 * a + p1) + 0.07 * Math.sin(5 * a + p2) + 0.04 * Math.sin(2 * a + p3 + i * 0.2)) * 1.25;
+      const px = cx + Math.cos(a) * rad * 1.35;
+      const py = cy + Math.sin(a) * rad;
+      d += `${k === 0 ? 'M' : 'L'}${px.toFixed(1)} ${py.toFixed(1)}`;
+    }
+    contours.push(d + 'Z');
+  }
+}
+
+// Vias principais (usadas pelos veículos)
+const arterials = [
+  'M-60 640 C 180 580, 330 540, 470 480 S 760 340, 980 310 S 1300 250, 1500 190',
+  'M140 -60 C 170 150, 220 300, 310 420 S 470 700, 520 960',
+  'M-60 300 C 200 320, 380 360, 560 395 S 900 470, 1120 520 S 1380 600, 1500 640',
+  'M720 -60 C 700 120, 650 250, 610 380 S 520 640, 610 960',
+  'M-60 830 C 240 770, 500 700, 760 645 S 1100 565, 1500 430',
+  'M960 -60 C 920 160, 880 260, 840 360 S 780 560, 920 960',
+];
+const river = 'M-80 128 C 190 168, 340 86, 520 146 S 830 246, 1010 176 S 1300 66, 1540 116';
+
+// Veículos: via, posição inicial (0..1), velocidade relativa
+const vehicles = routes.map((rt, i) => ({
+  ...rt,
+  path: i % arterials.length,
+  t0: [0.22, 0.48, 0.36, 0.64, 0.42, 0.18, 0.7, 0.56][i],
+  speed: rt.status === 'parado' ? 0 : rt.status === 'atrasado' ? 0.35 : 0.7 + (i % 3) * 0.18,
+}));
+
+const pct = Math.round((totals.done / totals.total) * 100);
+---
+<section class="hero" id="topo" aria-labelledby="hero-title">
+  <div class="map" id="mapa" aria-hidden="true">
+    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" class="map-svg" data-map>
+      <rect width={W} height={H} fill="#13140e" />
+      <g class="contours" fill="none" stroke="#1f2018" stroke-width="1">
+        {contours.map((d) => <path d={d} />)}
+      </g>
+      <path d={river} fill="none" stroke="#1b1d18" stroke-width="34" stroke-linecap="round" />
+      <path d={river} fill="none" stroke="#25271f" stroke-width="1" transform="translate(0 -17)" />
+      <path d={river} fill="none" stroke="#25271f" stroke-width="1" transform="translate(0 17)" />
+      <g transform="rotate(-11 720 450)">
+        <path d={minor} fill="none" stroke="#24251d" stroke-width="1.4" />
+      </g>
+      <g class="arterials" fill="none">
+        {arterials.map((d, i) => <path d={d} stroke="#34352c" stroke-width="5" stroke-linecap="round" data-arterial={i} />)}
+      </g>
+      <g data-stops></g>
+      <g class="vehicles">
+        {vehicles.map((v) => (
+          <g class={`veh veh-${v.status}`} data-veh data-path={v.path} data-t={v.t0} data-speed={v.speed}>
+            {v.status === 'rota' && (
+              <>
+                <circle r="15" fill="none" stroke="#ebfc72" stroke-opacity=".28" />
+                <circle r="7" fill="#ebfc72" />
+              </>
+            )}
+            {v.status === 'parado' && <rect x="-7" y="-7" width="14" height="14" fill="#13140e" stroke="#f4f3e8" stroke-width="2" />}
+            {v.status === 'atrasado' && (
+              <>
+                <circle r="12" fill="none" stroke="#f4f3e8" stroke-width="1.5" class="pulse" />
+                <path d="M0 -10 L9 7 H-9 Z" fill="#f4f3e8" />
+              </>
+            )}
+            <text x="16" y="-12" class="veh-label">{v.id}{v.note ? `  ${v.note}` : ''}</text>
+          </g>
+        ))}
+      </g>
+    </svg>
+    <div class="scrim"></div>
+  </div>
+
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <ul class="legend mono" aria-label="Legenda do mapa">
+        <li><StatusIcon status="rota" /> Em rota {countBy('rota')}</li>
+        <li><StatusIcon status="parado" /> Parado {countBy('parado')}</li>
+        <li><StatusIcon status="atrasado" /> Atrasado {countBy('atrasado')}</li>
+      </ul>
+
+      <div class="hero-text" id="conteudo">
+        <h1 class="h-display" id="hero-title">Toda a frota no mapa. Cada entrega com prova.</h1>
+        <p class="lede">A Rotta mostra seus veículos em tempo real, monta as rotas do dia e registra foto, assinatura e local de cada entrega. A central acompanha tudo numa tela; o motorista resolve tudo no celular.</p>
+        <div class="hero-actions">
+          <a href="#contato" class="btn btn-primary">Agendar demonstração</a>
+          <a href="#planos" class="btn btn-ghost">Ver planos a partir de R$ 39</a>
+        </div>
+      </div>
+    </div>
+
+    <aside class="ops" aria-label="Painel de entregas do dia (demonstração)">
+      <header class="ops-head">
+        <p>Entregas de hoje</p>
+        <p class="mono muted clock"><span data-clock>14:32</span> <span class="live"><span class="live-dot"></span>ao vivo</span></p>
+      </header>
+
+      <div class="ops-total">
+        <p class="ops-count mono"><span data-total-done>{totals.done}</span><span class="muted">/{totals.total}</span></p>
+        <p class="muted ops-count-label">entregas concluídas em 8 rotas</p>
+        <div class="bar bar-lg" role="progressbar" aria-label="Progresso total" aria-valuemin="0" aria-valuemax={totals.total} aria-valuenow={totals.done}>
+          <span style={`width:${pct}%`} data-total-bar></span>
+        </div>
+      </div>
+
+      <ol class="ops-list">
+        {routes.map((rt, i) => {
+          const p = Math.round((rt.done / rt.total) * 100);
+          return (
+            <li class={`row row-${rt.status}`} data-row={i} data-done={rt.done} data-total={rt.total}>
+              <div class="row-top">
+                <span class="row-id mono"><StatusIcon status={rt.status} size={11} />{rt.id}</span>
+                <span class="row-driver">{rt.driver}</span>
+                <span class="row-count mono"><span data-row-done>{rt.done}</span>/{rt.total}</span>
+              </div>
+              <div class="bar"><span style={`width:${p}%`} data-row-bar></span></div>
+              <div class="row-meta mono muted">
+                <span>{rt.area}</span>
+                <span>{rt.status === 'rota' ? `fim ${rt.eta}` : rt.status === 'parado' ? rt.note : `atrasado ${rt.note}`}</span>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    height: 100vh;
+    height: 100svh;
+    min-height: 560px;
+    isolation: isolate;
+  }
+  .map { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+  .map-svg { width: 100%; height: 100%; max-width: none; }
+  .scrim {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(to top, rgba(19,20,14,.96) 0%, rgba(19,20,14,.72) 30%, rgba(19,20,14,0) 62%),
+      linear-gradient(to right, rgba(19,20,14,.55) 0%, rgba(19,20,14,0) 45%);
+    pointer-events: none;
+  }
+  .veh-label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    fill: #f4f3e8;
+    paint-order: stroke;
+    stroke: #13140e;
+    stroke-width: 5px;
+    stroke-linejoin: round;
+  }
+  .veh-parado .veh-label, .veh-rota .veh-label { opacity: .9; }
+  .pulse { transform-origin: center; transform-box: fill-box; animation: pulse 1.8s ease-out infinite; }
+  @keyframes pulse {
+    0% { transform: scale(.6); opacity: .9; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 392px;
+    height: 100%;
+  }
+  .hero-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: calc(var(--nav-h) + var(--spacing-21)) var(--gutter) clamp(29px, 6svh, 59px);
+    min-height: 0;
+    pointer-events: none;
+  }
+  .hero-copy a, .hero-copy .legend { pointer-events: auto; }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: var(--spacing-18);
+    font-size: var(--text-caption);
+    align-self: flex-start;
+    padding: var(--spacing-7) var(--spacing-14);
+    border: 1px solid var(--color-iron-filings);
+    border-radius: var(--radius-md);
+    background: rgba(19,20,14,.8);
+  }
+  .legend li { display: inline-flex; align-items: center; gap: var(--spacing-7); }
+  .hero-text { max-width: 760px; display: grid; gap: clamp(14px, 2.2svh, 21px); }
+  /* a manchete escala pela largura e pela altura da janela */
+  .hero-text .h-display { max-width: 13ch; text-wrap: balance; font-size: min(var(--text-display), 8.6svh); }
+  .hero-text .lede { max-width: 50ch; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-14); margin-top: var(--spacing-7); }
+
+  /* Painel lateral */
+  .ops {
+    background: var(--color-obsidian-loam);
+    border-left: 1px solid var(--color-iron-filings);
+    padding: calc(var(--nav-h) + var(--spacing-18)) var(--spacing-21) var(--spacing-21);
+    display: flex; flex-direction: column; gap: var(--spacing-18);
+    min-height: 0;
+    overflow: hidden;
+    font-size: var(--text-ui);
+    letter-spacing: 0;
+  }
+  .ops-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--spacing-14); font-size: var(--text-body); letter-spacing: var(--tracking); }
+  .clock { font-size: var(--text-caption); display: inline-flex; gap: var(--spacing-7); align-items: center; }
+  .live { display: inline-flex; align-items: center; gap: 5px; color: var(--color-bone-vellum); }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-lime-surveyor); animation: blink 1.6s steps(2, start) infinite; }
+  @keyframes blink { to { opacity: .25; } }
+  .ops-total { display: grid; gap: var(--spacing-7); padding-bottom: var(--spacing-18); border-bottom: 1px solid var(--color-iron-filings); }
+  .ops-count { font-size: 48px; font-weight: 300; line-height: 1; }
+  .ops-count-label { font-size: var(--text-ui); }
+  .bar { height: 3px; background: var(--color-iron-filings); position: relative; overflow: hidden; }
+  .bar-lg { height: 6px; margin-top: var(--spacing-7); }
+  .bar span {
+    position: absolute; inset: 0 auto 0 0;
+    background: var(--color-lime-surveyor);
+    transition: width .6s cubic-bezier(.2,.7,.2,1);
+  }
+  .row-atrasado .bar span { background: var(--color-bone-vellum); }
+  .row-parado .bar span { background: var(--color-drift-ash); }
+  .ops-list { display: grid; align-content: start; flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #404040 transparent; }
+  .row { display: grid; gap: var(--spacing-7); padding: 11px 0 12px; border-bottom: 1px solid #2a2b24; }
+  .row-top { display: grid; grid-template-columns: 74px 1fr auto; align-items: center; gap: var(--spacing-7); }
+  .row-id { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-caption); }
+  .row-driver { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-count { font-size: var(--text-caption); }
+  .row-meta { display: flex; justify-content: space-between; gap: var(--spacing-7); font-size: 12px; }
+  .row-meta span:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-atrasado .row-meta span:last-child { color: var(--color-bone-vellum); }
+  .row.bump .row-count { color: var(--color-lime-surveyor); }
+
+  @media (max-height: 760px) and (min-width: 981px) {
+    .hero-text .lede { font-size: 16px; line-height: 1.5; }
+    .ops-count { font-size: 40px; }
+    .legend { padding-block: 5px; }
+  }
+  @media (max-width: 980px) {
+    .hero { height: auto; min-height: 0; }
+    .hero-grid { height: auto; }
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-copy { min-height: max(100svh, 700px); }
+    .ops-list { overflow: visible; }
+    .ops { overflow: visible; border-left: 0; border-top: 1px solid var(--color-iron-filings); padding-top: var(--spacing-29); padding-inline: var(--gutter); }
+    .map { bottom: auto; height: max(100svh, 700px); }
+  }
+  @media (max-width: 560px) {
+    .legend { gap: var(--spacing-14); }
+  }
+</style>
+
+<script>
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const svg = document.querySelector<SVGSVGElement>('[data-map]');
+  if (svg) {
+    const paths = [...svg.querySelectorAll<SVGPathElement>('[data-arterial]')];
+    const lens = paths.map((p) => p.getTotalLength());
+
+    // Paradas ao longo das vias
+    const stops = svg.querySelector('[data-stops]')!;
+    const NS = 'http://www.w3.org/2000/svg';
+    paths.forEach((p, i) => {
+      [0.16, 0.31, 0.47, 0.62, 0.78].forEach((t, k) => {
+        const pt = p.getPointAtLength(lens[i] * t);
+        const c = document.createElementNS(NS, 'circle');
+        c.setAttribute('cx', String(pt.x));
+        c.setAttribute('cy', String(pt.y));
+        c.setAttribute('r', '4');
+        const done = (i + k) % 3 !== 0;
+        c.setAttribute('fill', done ? '#84837b' : '#13140e');
+        c.setAttribute('stroke', done ? 'none' : '#f4f3e8');
+        c.setAttribute('stroke-width', '1.5');
+        stops.appendChild(c);
+      });
+    });
+
+    const vehs = [...svg.querySelectorAll<SVGGElement>('[data-veh]')].map((el) => ({
+      el,
+      path: Number(el.dataset.path),
+      t: Number(el.dataset.t),
+      speed: Number(el.dataset.speed),
+      dir: 1,
+    }));
+
+    const place = (v: (typeof vehs)[number]) => {
+      const pt = paths[v.path].getPointAtLength(lens[v.path] * v.t);
+      v.el.setAttribute('transform', `translate(${pt.x.toFixed(1)} ${pt.y.toFixed(1)})`);
+    };
+    vehs.forEach(place);
+
+    if (!reduce) {
+      let last = performance.now();
+      let visible = true;
+      new IntersectionObserver(([e]) => (visible = e.isIntersecting)).observe(svg);
+      const tick = (now: number) => {
+        const dt = Math.min(64, now - last) / 1000;
+        last = now;
+        if (visible && !document.hidden) {
+          for (const v of vehs) {
+            if (!v.speed) continue;
+            v.t += (v.dir * v.speed * 22 * dt) / lens[v.path];
+            if (v.t > 0.94 || v.t < 0.06) v.dir *= -1;
+            place(v);
+          }
+        }
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+  }
+
+  // Relógio ao vivo
+  const clock = document.querySelector('[data-clock]');
+  const fmt = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const setClock = () => clock && (clock.textContent = fmt.format(new Date()));
+  setClock();
+  setInterval(setClock, 15000);
+
+  // Entregas concluídas chegando ao painel
+  if (!reduce) {
+    const rows = [...document.querySelectorAll<HTMLElement>('[data-row]')].filter((r) => !r.classList.contains('row-parado'));
+    const totalEl = document.querySelector('[data-total-done]');
+    const totalBar = document.querySelector<HTMLElement>('[data-total-bar]');
+    const totalAll = rows.length ? Number(document.querySelector('.ops-count .muted')?.textContent?.slice(1)) : 0;
+    let totalDone = Number(totalEl?.textContent ?? 0);
+    setInterval(() => {
+      if (document.hidden) return;
+      const open = rows.filter((r) => Number(r.dataset.done) < Number(r.dataset.total));
+      if (!open.length) return;
+      const row = open[Math.floor(Math.random() * open.length)];
+      const done = Number(row.dataset.done) + 1;
+      row.dataset.done = String(done);
+      row.querySelector('[data-row-done]')!.textContent = String(done);
+      row.querySelector<HTMLElement>('[data-row-bar]')!.style.width = `${(done / Number(row.dataset.total)) * 100}%`;
+      row.classList.add('bump');
+      setTimeout(() => row.classList.remove('bump'), 1400);
+      totalDone += 1;
+      if (totalEl) totalEl.textContent = String(totalDone);
+      if (totalBar && totalAll) totalBar.style.width = `${(totalDone / totalAll) * 100}%`;
+    }, 5200);
+  }
+</script>

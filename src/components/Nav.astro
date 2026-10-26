@@ -1,0 +1,130 @@
+---
+import Logo from './Logo.astro';
+const links = [
+  { href: '#mapa', label: 'Mapa ao vivo' },
+  { href: '#rotas', label: 'Roteirização' },
+  { href: '#comprovante', label: 'Comprovante' },
+  { href: '#app', label: 'App do motorista' },
+  { href: '#planos', label: 'Planos' },
+];
+---
+<header class="nav" data-nav>
+  <div class="nav-inner">
+    <a href="#topo" class="brand" aria-label="Rotta, voltar ao início">
+      <Logo />
+      <span>Rotta</span>
+    </a>
+    <nav aria-label="Principal" class="nav-links">
+      <ul>
+        {links.map((l) => <li><a href={l.href} class="mono">{l.label}</a></li>)}
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-primary nav-cta" href="#contato">Agendar demonstração</a>
+      <button class="menu-btn mono" type="button" aria-expanded="false" aria-controls="menu-mobile" data-menu-btn>
+        Menu <span class="dot" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+  <div class="menu-mobile" id="menu-mobile" hidden data-menu>
+    <ul>
+      {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+      <li><a href="#contato" class="btn btn-primary">Agendar demonstração</a></li>
+    </ul>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    transition: background-color .2s ease, border-color .2s ease;
+    border-bottom: 1px solid transparent;
+  }
+  .nav.is-solid {
+    background: rgba(19, 20, 14, .94);
+    border-bottom-color: var(--color-iron-filings);
+    backdrop-filter: blur(8px);
+  }
+  .nav-inner {
+    height: var(--nav-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-29);
+    padding-inline: var(--gutter);
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    font-size: 20px;
+    letter-spacing: var(--tracking);
+  }
+  .nav-links ul { display: flex; gap: var(--spacing-29); }
+  .nav-links a {
+    font-size: var(--text-caption);
+    text-decoration: none;
+    color: var(--color-bone-vellum);
+    opacity: .82;
+    transition: opacity .15s;
+  }
+  .nav-links a:hover { opacity: 1; text-decoration: underline; text-underline-offset: 5px; }
+  .nav-actions { display: flex; align-items: center; gap: var(--spacing-14); }
+  .menu-btn {
+    display: none;
+    align-items: center;
+    gap: var(--spacing-7);
+    min-height: 44px;
+    padding: 0 var(--spacing-7);
+    background: none;
+    border: 0;
+    font-size: var(--text-caption);
+    cursor: pointer;
+  }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--color-lime-surveyor); }
+  .menu-mobile {
+    background: var(--color-obsidian-loam);
+    border-bottom: 1px solid var(--color-iron-filings);
+    padding: var(--spacing-18) var(--gutter) var(--spacing-29);
+  }
+  .menu-mobile ul { display: grid; gap: var(--spacing-5); }
+  .menu-mobile a:not(.btn) {
+    display: block;
+    padding: var(--spacing-14) 0;
+    font-size: 24px;
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-iron-filings);
+  }
+  .menu-mobile .btn { margin-top: var(--spacing-18); width: 100%; }
+
+  @media (max-width: 1080px) {
+    .nav-links { display: none; }
+    .menu-btn { display: inline-flex; }
+  }
+  @media (max-width: 560px) {
+    .nav-cta { display: none; }
+  }
+</style>
+
+<script>
+  const nav = document.querySelector<HTMLElement>('[data-nav]')!;
+  const btn = document.querySelector<HTMLButtonElement>('[data-menu-btn]')!;
+  const menu = document.querySelector<HTMLElement>('[data-menu]')!;
+  const onScroll = () => nav.classList.toggle('is-solid', window.scrollY > 24 || !menu.hidden);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  const setOpen = (open: boolean) => {
+    menu.hidden = !open;
+    btn.setAttribute('aria-expanded', String(open));
+    btn.firstChild!.textContent = open ? 'Fechar ' : 'Menu ';
+    onScroll();
+  };
+  btn.addEventListener('click', () => setOpen(menu.hidden));
+  menu.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('a')) setOpen(false);
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hidden) { setOpen(false); btn.focus(); } });
+</script>

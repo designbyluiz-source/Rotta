@@ -1,0 +1,42 @@
+---
+const items = [
+  { k: 'App do motorista', v: 'React Native', t: 'Envia a posição em intervalos regulares e mantém uma fila local de posições, fotos e assinaturas. Quando o sinal volta, sincroniza na ordem em que tudo aconteceu.' },
+  { k: 'Posições e trajetos', v: 'PostGIS + TimescaleDB', t: 'As posições ficam em séries temporais, prontas para consultas geográficas: quem está perto de um endereço, quanto tempo um veículo ficou parado, qual trajeto fez.' },
+  { k: 'Roteirização', v: 'OR-Tools + OSRM', t: 'Resolve o problema de roteamento de veículos com janelas de horário e capacidade, usando a matriz de distâncias e tempos pelas ruas.' },
+  { k: 'Rastreadores físicos', v: 'Próxima fase', t: 'Integração com rastreadores veiculares pelos protocolos dos fabricantes, para frotas que já têm equipamento instalado.' },
+];
+---
+<section class="section tech" id="tecnologia" aria-labelledby="tech-title">
+  <div class="container">
+    <div class="head">
+      <h2 class="h-heading" id="tech-title">Por dentro da Rotta.</h2>
+      <p class="lede muted">Para quem decide a tecnologia: a base que sustenta o mapa ao vivo, as rotas e os comprovantes.</p>
+    </div>
+    <ul class="specs">
+      {items.map((i) => (
+        <li>
+          <div class="spec-top">
+            <h3>{i.k}</h3>
+            <span class="tag">{i.v}</span>
+          </div>
+          <p class="muted">{i.t}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .head { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: var(--spacing-59); align-items: end; margin-bottom: var(--spacing-59); }
+  .specs { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--color-iron-filings); }
+  .specs li { padding: var(--spacing-29) var(--spacing-29) var(--spacing-29) 0; border-bottom: 1px solid var(--color-iron-filings); display: grid; gap: var(--spacing-14); align-content: start; }
+  .specs li:nth-child(even) { padding-left: var(--spacing-29); padding-right: 0; border-left: 1px solid var(--color-iron-filings); }
+  .spec-top { display: flex; justify-content: space-between; align-items: center; gap: var(--spacing-14); flex-wrap: wrap; }
+  h3 { font-size: 24px; letter-spacing: var(--tracking); line-height: 1.2; }
+  .specs p { max-width: 52ch; }
+  @media (max-width: 860px) {
+    .head { grid-template-columns: 1fr; gap: var(--spacing-21); margin-bottom: var(--spacing-29); }
+    .specs { grid-template-columns: 1fr; }
+    .specs li, .specs li:nth-child(even) { padding: var(--spacing-21) 0; border-left: 0; }
+  }
+</style>

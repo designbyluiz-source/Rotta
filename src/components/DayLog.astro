@@ -1,0 +1,55 @@
+---
+const log = [
+  { time: '06:30', title: 'Rotas do dia prontas antes do café', text: 'Os pedidos entram por planilha, API ou cadastro manual. A Rotta distribui as paradas entre os veículos e define a ordem de cada rota.' },
+  { time: '07:10', title: 'Motoristas saem com a rota no celular', text: 'Cada motorista abre o app e vê a próxima parada, o endereço e a janela de horário. A navegação abre no app de mapas que ele já usa.' },
+  { time: '10:45', title: 'O atraso aparece no mapa primeiro', text: 'Quando um veículo passa da previsão, o status muda e a central recebe o alerta. Dá para reorganizar as paradas seguintes antes do cliente ligar.' },
+  { time: '13:20', title: 'O cliente acompanha pelo link', text: 'Cada pedido tem um link de rastreamento com previsão de chegada e posição do veículo, enviado por SMS, WhatsApp ou e-mail.' },
+  { time: '16:05', title: 'Contestação resolvida com o comprovante', text: 'Foto, assinatura, horário e coordenadas ficam anexados ao pedido. O atendimento responde com o comprovante na primeira mensagem.' },
+  { time: '19:00', title: 'Fechamento do dia em um relatório', text: 'Quilômetros rodados, entregas por motorista, tempo parado e pontualidade por rota, prontos para a reunião de amanhã.' },
+];
+---
+<section class="section daylog" aria-labelledby="daylog-title">
+  <div class="container grid">
+    <div class="intro">
+      <h2 class="h-heading" id="daylog-title">Um dia de operação, da primeira rota ao fechamento.</h2>
+      <p class="lede muted">O que muda na rotina da central, do motorista e do cliente quando a frota roda pela Rotta.</p>
+    </div>
+    <ol class="log">
+      {log.map((e) => (
+        <li>
+          <time class="mono">{e.time}</time>
+          <div>
+            <h3>{e.title}</h3>
+            <p class="muted">{e.text}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--spacing-59);
+    align-items: start;
+  }
+  .intro { position: sticky; top: calc(var(--nav-h) + var(--spacing-29)); display: grid; gap: var(--spacing-21); }
+  .log { border-top: 1px solid var(--color-iron-filings); }
+  .log li {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: var(--spacing-18);
+    padding: var(--spacing-21) 0 var(--spacing-29);
+    border-bottom: 1px solid var(--color-iron-filings);
+  }
+  time { font-size: var(--text-body); font-weight: 300; padding-top: 2px; color: var(--color-lime-surveyor); }
+  h3 { font-size: 24px; line-height: 1.25; letter-spacing: var(--tracking); margin-bottom: var(--spacing-7); }
+  .log p { max-width: 56ch; }
+  @media (max-width: 880px) {
+    .grid { grid-template-columns: 1fr; gap: var(--spacing-29); }
+    .intro { position: static; }
+    .log li { grid-template-columns: 1fr; gap: var(--spacing-7); }
+  }
+</style>

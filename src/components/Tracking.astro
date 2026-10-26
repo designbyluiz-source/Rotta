@@ -1,0 +1,147 @@
+---
+const timeline = [
+  { t: '08:12', l: 'Pedido separado', state: 'done' },
+  { t: '09:40', l: 'Saiu para entrega', state: 'done' },
+  { t: 'agora', l: 'A caminho, 2 paradas antes da sua', state: 'now' },
+  { t: '14:20 às 14:40', l: 'Entrega prevista', state: 'next' },
+];
+const minPath = 'M30 210 H110 V150 H190 V96 H262 V48';
+---
+<section class="section tracking" id="rastreio" aria-labelledby="tracking-title">
+  <div class="container grid">
+    <div class="copy">
+      <h2 class="h-heading" id="tracking-title">Seu cliente acompanha o pedido pelo link.</h2>
+      <p class="lede">Assim que a rota sai, cada cliente recebe um link com a posição do veículo e a janela de chegada, como nos apps de delivery. A previsão se ajusta sozinha conforme o motorista avança.</p>
+      <div class="msg">
+        <p class="msg-from mono muted">Mensagem enviada às 09:40</p>
+        <p class="msg-body">Distribuidora Vale: seu pedido saiu para entrega e chega hoje entre 14:20 e 14:40. Acompanhe em <span class="mono link">rotta.app/r/K7Q2</span></p>
+      </div>
+      <ul class="facts">
+        <li><span class="mono">SMS, WhatsApp ou e-mail</span><span class="muted">Envio automático na saída da rota</span></li>
+        <li><span class="mono">Sua marca</span><span class="muted">Logo e cores da sua empresa na página</span></li>
+        <li><span class="mono">Avaliação</span><span class="muted">Nota e comentário após a entrega</span></li>
+      </ul>
+    </div>
+
+    <div class="track-device" aria-label="Página de rastreamento vista pelo cliente (demonstração)" role="group">
+      <div class="url mono"><span class="lock" aria-hidden="true"></span>rotta.app/r/K7Q2</div>
+      <div class="track-body">
+        <div class="t-head">
+          <p class="mono muted brand-line">Distribuidora Vale</p>
+          <p class="eta">Chega entre <span class="mono">14:20</span> e <span class="mono">14:40</span></p>
+        </div>
+        <div class="mini">
+          <svg viewBox="0 0 300 250" aria-hidden="true">
+            <rect width="300" height="250" fill="#1a1b14" />
+            <g stroke="#262720" stroke-width="10">
+              <path d="M0 210 H300" /><path d="M0 150 H300" /><path d="M0 96 H300" /><path d="M0 48 H300" />
+              <path d="M110 0 V250" /><path d="M190 0 V250" /><path d="M262 0 V250" /><path d="M40 0 V250" />
+            </g>
+            <path d={minPath} fill="none" stroke="#84837b" stroke-width="2" stroke-dasharray="4 5" />
+            <path d={minPath} fill="none" stroke="#ebfc72" stroke-width="3" pathLength="1" class="trail" />
+            <circle r="5" cx="190" cy="96" fill="none" stroke="#f4f3e8" stroke-width="1.5" />
+            <circle r="5" cx="226" cy="96" fill="none" stroke="#f4f3e8" stroke-width="1.5" />
+            <g transform="translate(262 48)">
+              <path d="M0 4 L-11 -6 V-18 H11 V-6 Z" fill="#f4f3e8" />
+              <text y="-26" text-anchor="middle" class="mini-l">você</text>
+            </g>
+            <g class="van">
+              <circle r="13" fill="#ebfc72" fill-opacity=".22" />
+              <circle r="7" fill="#ebfc72" />
+            </g>
+          </svg>
+        </div>
+        <ol class="tl">
+          {timeline.map((s) => (
+            <li class={`tl-${s.state}`}>
+              <span class="tl-dot" aria-hidden="true"></span>
+              <span class="tl-l">{s.l}</span>
+              <span class="tl-t mono muted">{s.t}</span>
+            </li>
+          ))}
+        </ol>
+        <div class="driver-card">
+          <span class="avatar mono" aria-hidden="true">CM</span>
+          <div>
+            <p>Carlos, seu entregador</p>
+            <p class="mono muted plate">Fiorino branca, BRA2E19</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: var(--spacing-86);
+    align-items: center;
+  }
+  .copy { display: grid; gap: var(--spacing-29); }
+  .msg {
+    max-width: 440px;
+    border: 1px solid var(--color-iron-filings);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-14) var(--spacing-18);
+    display: grid; gap: var(--spacing-7);
+  }
+  .msg-from { font-size: var(--text-caption); }
+  .msg-body { font-size: 16px; line-height: 1.5; letter-spacing: -0.01em; }
+  .link { color: var(--color-lime-surveyor); text-decoration: underline; text-underline-offset: 3px; font-size: 14px; }
+  .facts { border-top: 1px solid var(--color-iron-filings); }
+  .facts li {
+    display: grid; grid-template-columns: 220px 1fr; gap: var(--spacing-18);
+    padding: var(--spacing-14) 0; border-bottom: 1px solid var(--color-iron-filings);
+  }
+  .facts .mono { font-size: var(--text-ui); padding-top: 3px; }
+
+  .track-device {
+    justify-self: center;
+    width: min(100%, 380px);
+    border: 1px solid var(--color-iron-filings);
+    border-radius: var(--radius-md);
+    background: var(--color-obsidian-loam);
+  }
+  .url {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 12px; padding: 10px; border-bottom: 1px solid var(--color-iron-filings);
+    color: var(--color-drift-ash);
+  }
+  .lock { width: 8px; height: 7px; background: var(--color-drift-ash); position: relative; margin-top: 3px; }
+  .lock::before { content: ''; position: absolute; left: 1px; top: -5px; width: 6px; height: 6px; border: 1.5px solid var(--color-drift-ash); border-bottom: 0; border-radius: 3px 3px 0 0; box-sizing: border-box; }
+  .track-body { padding: var(--spacing-18); display: grid; gap: var(--spacing-18); }
+  .brand-line { font-size: var(--text-caption); }
+  .eta { font-size: 26px; line-height: 1.15; }
+  .eta .mono { font-weight: 300; }
+  .mini svg { width: 100%; height: auto; }
+  .mini-l { font-family: var(--font-mono); font-size: 12px; fill: #f4f3e8; }
+  .trail { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .van { offset-path: path('M30 210 H110 V150 H190 V96 H262 V48'); offset-rotate: 0deg; animation: drive 9s cubic-bezier(.45,.05,.55,.95) infinite; }
+  .trail { animation: trail 9s cubic-bezier(.45,.05,.55,.95) infinite; }
+  @keyframes drive { 0% { offset-distance: 0%; } 70%, 100% { offset-distance: 62%; } }
+  @keyframes trail { 0% { stroke-dashoffset: 1; } 70%, 100% { stroke-dashoffset: .38; } }
+  @media (prefers-reduced-motion: reduce) {
+    .van { offset-distance: 62%; animation: none; }
+    .trail { stroke-dashoffset: .38; animation: none; }
+  }
+
+  .tl { display: grid; gap: 0; }
+  .tl li { display: grid; grid-template-columns: 14px 1fr auto; gap: 12px; align-items: center; padding: 8px 0; font-size: 15px; letter-spacing: -0.01em; position: relative; }
+  .tl-dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--color-drift-ash); }
+  .tl-done .tl-dot { background: var(--color-drift-ash); }
+  .tl-now .tl-dot { background: var(--color-lime-surveyor); border-color: var(--color-lime-surveyor); outline: 4px solid rgba(235,252,114,.18); }
+  .tl-done .tl-l { color: var(--color-drift-ash); }
+  .tl-t { font-size: 12px; }
+  .driver-card { display: flex; gap: var(--spacing-14); align-items: center; padding-top: var(--spacing-14); border-top: 1px solid var(--color-iron-filings); font-size: 15px; letter-spacing: -0.01em; line-height: 1.35; }
+  .avatar { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--color-iron-filings); border-radius: 50%; font-size: 12px; flex: none; }
+  .plate { font-size: 12px; }
+
+  @media (max-width: 960px) {
+    .grid { grid-template-columns: 1fr; gap: var(--spacing-59); }
+  }
+  @media (max-width: 520px) {
+    .facts li { grid-template-columns: 1fr; gap: 2px; }
+  }
+</style>

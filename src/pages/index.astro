@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import DayLog from '../components/DayLog.astro';
+import Routing from '../components/Routing.astro';
+import Proof from '../components/Proof.astro';
+import DriverApp from '../components/DriverApp.astro';
+import Tracking from '../components/Tracking.astro';
+import Tech from '../components/Tech.astro';
+import Pricing from '../components/Pricing.astro';
+import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
+---
+<Base
+  title="Rotta, gestão de frotas e entregas em tempo real"
+  description="Acompanhe veículos no mapa, monte rotas otimizadas e registre foto, assinatura e local de cada entrega. Planos a partir de R$ 39 por veículo/mês."
+>
+  <Nav />
+  <main>
+    <Hero />
+    <DayLog />
+    <Routing />
+    <Proof />
+    <DriverApp />
+    <Tracking />
+    <Tech />
+    <Pricing />
+    <Contact />
+  </main>
+  <Footer />
+</Base>

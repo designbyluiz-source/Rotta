@@ -1,0 +1,47 @@
+/* Tokens derivados de design/tokens.json (referência: inversa.com).
+   Correção: o token de superfície "#13140" é inválido; usar #13140e. */
+:root {
+  --color-obsidian-loam: #13140e;
+  --color-bone-vellum: #f4f3e8;
+  --color-iron-filings: #404040;
+  --color-drift-ash: #84837b;
+  --color-lime-surveyor: #ebfc72;
+  --color-marsh-olive: #bacd31;
+
+  /* Tons derivados do canvas para mapas e superfícies de produto */
+  --color-loam-raised: #1a1b14;
+  --color-loam-line: #23241c;
+  --color-loam-street: #303128;
+
+  --font-sans: 'NB International Pro', 'Inter Tight Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --text-caption: 13px;
+  --text-ui: 14px;
+  --text-body: 18px;
+  --leading-body: 1.62;
+  --text-subheading: 29px;
+  --text-heading: clamp(38px, 5.2vw, 58px);
+  --leading-heading: 1.06;
+  --text-display: clamp(46px, 7.2vw, 72px);
+  --leading-display: 0.9;
+  --tracking: -0.03em;
+
+  --spacing-5: 5px;
+  --spacing-7: 7px;
+  --spacing-14: 14px;
+  --spacing-18: 18px;
+  --spacing-21: 21px;
+  --spacing-29: 29px;
+  --spacing-59: 59px;
+  --spacing-86: 86px;
+  --spacing-104: 104px;
+  --spacing-119: 119px;
+
+  --page-max-width: 1200px;
+  --section-gap: clamp(72px, 10vw, 104px);
+  --gutter: clamp(18px, 4vw, 29px);
+
+  --radius-md: 3.6px;
+  --nav-h: 64px;
+}
