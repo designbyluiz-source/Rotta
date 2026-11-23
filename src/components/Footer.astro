@@ -1,5 +1,6 @@
 ---
 import Logo from './Logo.astro';
+import { entities, address, mapsUrl } from '../data/company';
 const year = new Date().getFullYear();
 ---
 <footer class="footer">
@@ -28,9 +29,25 @@ const year = new Date().getFullYear();
       </ul>
     </nav>
   </div>
+  <div class="container legal">
+    <ul class="entities" aria-label="Razão social">
+      {entities.map((e) => (
+        <li>
+          <span>{e.name}</span>
+          <span class="muted">CNPJ {e.cnpj}</span>
+        </li>
+      ))}
+    </ul>
+    <address>
+      <a href={mapsUrl} target="_blank" rel="noopener">
+        {address.street} - {address.district}<br />
+        {address.city} - {address.state}, {address.postalCode}
+      </a>
+    </address>
+  </div>
   <div class="container base mono muted">
-    <span>© {year} Rotta</span>
-    <span>-25.4284, -49.2733</span>
+    <span>© {year} Rotta. Todos os direitos reservados.</span>
+    <span>{address.city} · {address.state}</span>
   </div>
 </footer>
 
@@ -44,9 +61,19 @@ const year = new Date().getFullYear();
   ul { display: grid; gap: var(--spacing-7); }
   a { text-decoration: none; display: inline-block; padding: 3px 0; }
   a:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .legal { display: grid; grid-template-columns: 2fr 2fr; gap: var(--spacing-29); padding-block: var(--spacing-29); border-top: 1px solid var(--color-iron-filings); }
+  .entities { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-21); }
+  .entities li { display: grid; gap: 2px; }
+  address { font-style: normal; justify-self: end; text-align: right; }
+  address a { padding: 0; line-height: 1.6; }
   .base { display: flex; justify-content: space-between; gap: var(--spacing-14); padding-block: var(--spacing-21); border-top: 1px solid var(--color-iron-filings); }
   @media (max-width: 720px) {
     .grid { grid-template-columns: 1fr 1fr; }
     .brand { grid-column: 1 / -1; }
+    .legal, .entities { grid-template-columns: 1fr; }
+    address { justify-self: start; text-align: left; }
+  }
+  @media (max-width: 480px) {
+    .base { flex-direction: column; }
   }
 </style>

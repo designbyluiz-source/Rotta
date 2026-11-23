@@ -1,7 +1,30 @@
 ---
 import '../styles/global.css';
+import { site, entities, address } from '../data/company';
 interface Props { title: string; description: string; }
 const { title, description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, site.url).href;
+const orgLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: site.name,
+  url: site.url,
+  logo: `${site.url}/icon-512.png`,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: address.street,
+    addressLocality: address.city,
+    addressRegion: address.state,
+    postalCode: address.postalCode,
+    addressCountry: address.country,
+  },
+  subOrganization: entities.map((e) => ({
+    '@type': 'Organization',
+    legalName: e.name,
+    taxID: e.cnpj,
+    address: { '@type': 'PostalAddress', streetAddress: `${address.street}, ${address.district}`, addressLocality: address.city, addressRegion: address.state, postalCode: address.postalCode, addressCountry: address.country },
+  })),
+};
 ---
 <!doctype html>
 <html lang="pt-BR">
@@ -14,6 +37,11 @@ const { title, description } = Astro.props;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content="pt_BR" />
+    <link rel="canonical" href={canonical} />
+    <script type="application/ld+json" set:html={JSON.stringify(orgLd)} />
     <link rel="icon" href="/favicon.ico?v=rotta1" sizes="48x48" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rotta1" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=rotta1" />

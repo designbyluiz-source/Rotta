@@ -1,6 +1,6 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  site: 'https://rotta.app',
+  site: 'https://rottainteligence.com',
   compressHTML: true,
 });
